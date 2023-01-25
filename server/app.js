@@ -79,46 +79,48 @@ app.post('/links',
 
 //signup first
 app.post('/signup',
-//  take in reguest and response params
-  (req, res, next) => {
+//  take in request and response params
+  (req, res) => {
     //  use get to check if username already exists
     var username = req.body.username;
     var password = req.body.password;
-    if (models.Users.get({'username': username})) {
-      //    if successful, redirect to signup page, let them know username already exists
-      return res.redirect('/signup');
-    }
-    //  create method; create new user object
-    //    return models.users.create user
-    //      does not need to send info back
-    return models.Users.create({'username': username, 'password': password})
-    //  get salt with createrandom32string
-      .then(results => {
-        return utils.createrandom32string();
+
+    return (models.Users.get({ username }))
+    //    if successful, redirect to signup page, let them know username already exists
+      .then(user => {
+        if (user) {
+          throw user;
+        }
+        // create method; create new user object
+        // return models.users.create user (does not need to send info back)
+        return models.Users.create({'username': username, 'password': password});
       })
-    //    if successful return update so salt is in database
+      // get salt with createrandom32string
+      .then(results => {
+        return utils.createRandom32String();
+      })
+      // if successful return update so salt is in database
       .then(salt => {
+        console.log('SALT: ', salt);
         return models.Users.update({'username': username, 'password': password, 'salt': null}, {'username': username, 'password': password, 'salt': salt});
       })
-    //  create a hash for the password with generated salt
+      // create a hash for the password with generated salt
       .then(results => {
-        //console.log results and results.salt later
-        return utils.createHash(password, results.salt); // salt might be accessed differetly***
+        return utils.createHash(password, results.salt);
       })
-    //    if successful return update so hashed password is in database
+      //  if successful return update so hashed password is in database
       .then(hashedPassword => {
-        //      does not need to send info back
         return models.Users.update({'username': username, 'password': password}, {'username': username, 'password': hashedPassword});
       })
-    //  then response.send status
+      // Let the user log in (redirect to '/' or '/index') status 302
       .then(results => {
-        //    Let the user log in (redirect to '/' or '/index') status 302
         res.redirect('/');
-        //res.status(302).send('/');
       })
-    //  if error send 500
       .error(error => {
         res.status(500).send(error);
+      })
+      .catch(user => {
+        res.redirect(302, '/signup');
       });
   });
 
