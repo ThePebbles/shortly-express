@@ -40,7 +40,8 @@ describe('', function() {
     /*************************************************************************************/
     db = mysql.createConnection({
       user: 'root',
-      password: 'students', // <-- Changed this
+      // password: 'students', // <-- Changed this (Sarah)
+      password: '', // <-- Changed this (Rachel)
       database: 'shortly'
     });
 
@@ -63,7 +64,7 @@ describe('', function() {
 
   describe('Database Schema:', function() {
     it('contains a users table', function(done) {
-      var queryString = 'SELECT * FROM users';
+      var queryString = 'SELECT * FROM users'; //change to DESCRIBE users; ??
       db.query(queryString, function(err, results) {
         if (err) { return done(err); }
 
@@ -123,7 +124,7 @@ describe('', function() {
     });
   });
 
-  xdescribe('Account Creation:', function() {
+  describe('Account Creation:', function() {
 
     it('signup creates a new user record', function(done) {
       var options = {
@@ -610,7 +611,7 @@ describe('', function() {
       }
     };
 
-    xbeforeEach(function(done) {
+    beforeEach(function(done) {
       var options = {
         'method': 'POST',
         'followAllRedirects': true,

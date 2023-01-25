@@ -77,7 +77,63 @@ app.post('/links',
 // Write your authentication routes here
 /************************************************************/
 
+//signup first
+app.post('/signup',
+//  take in reguest and response params
+  (req, res, next) => {
+    //  use get to check if username already exists
+    var username = req.body.username;
+    var password = req.body.password;
+    if (models.Users.get({'username': username})) {
+      //    if successful, redirect to signup page, let them know username already exists
+      return res.redirect('/signup');
+    }
+    //  create method; create new user object
+    //    return models.users.create user
+    //      does not need to send info back
+    return models.Users.create({'username': username, 'password': password})
+    //  get salt with createrandom32string
+      .then(results => {
+        return utils.createrandom32string();
+      })
+    //    if successful return update so salt is in database
+      .then(salt => {
+        return models.Users.update({'username': username, 'password': password, 'salt': null}, {'username': username, 'password': password, 'salt': salt});
+      })
+    //  create a hash for the password with generated salt
+      .then(results => {
+        //console.log results and results.salt later
+        return utils.createHash(password, results.salt); // salt might be accessed differetly***
+      })
+    //    if successful return update so hashed password is in database
+      .then(hashedPassword => {
+        //      does not need to send info back
+        return models.Users.update({'username': username, 'password': password}, {'username': username, 'password': hashedPassword});
+      })
+    //  then response.send status
+      .then(results => {
+        //    Let the user log in (redirect to '/' or '/index') status 302
+        res.redirect('/');
+        //res.status(302).send('/');
+      })
+    //  if error send 500
+      .error(error => {
+        res.status(500).send(error);
+      });
+  });
 
+//login
+//  Take in request and response params
+//  Check if the username already exists (get)
+//    If the user does NOT exist, throw error, redirect to signup page (302 '/signup')
+//  Get user from the db, (password, salt)
+//    Return results
+//  Compare attempted pwd, stored pwd, salt (under Users constructor)
+//    If true (is a match)
+//      Let the user log in (redirect to '/' or '/index') send status 302
+//    If false (not a match)
+//      Send 200 status code, potential console log or something to let the user know the password was incorrect
+//  If error send 500
 
 /************************************************************/
 // Handle the code parameter route last - if all other routes fail
