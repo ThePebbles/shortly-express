@@ -77,22 +77,20 @@ app.post('/links',
 // Write your authentication routes here
 /************************************************************/
 
-//signup first
+// signup
 app.post('/signup',
 //  take in request and response params
   (req, res) => {
-    //  use get to check if username already exists
     var username = req.body.username;
     var password = req.body.password;
-
+    //  use get to check if username already exists
     return (models.Users.get({ username }))
-    //    if successful, redirect to signup page, let them know username already exists
+    // if successful, redirect to signup page, let them know username already exists
       .then(user => {
         if (user) {
           throw user;
         }
-        // create method; create new user object
-        // return models.users.create user (does not need to send info back)
+        // create new user object
         return models.Users.create({'username': username, 'password': password});
       })
       // get salt with createrandom32string
@@ -101,7 +99,6 @@ app.post('/signup',
       })
       // if successful return update so salt is in database
       .then(salt => {
-        console.log('SALT: ', salt);
         return models.Users.update({'username': username, 'password': password, 'salt': null}, {'username': username, 'password': password, 'salt': salt});
       })
       // create a hash for the password with generated salt
@@ -120,22 +117,46 @@ app.post('/signup',
         res.status(500).send(error);
       })
       .catch(user => {
-        res.redirect(302, '/signup');
+        res.redirect('/signup');
       });
   });
 
-//login
-//  Take in request and response params
-//  Check if the username already exists (get)
-//    If the user does NOT exist, throw error, redirect to signup page (302 '/signup')
-//  Get user from the db, (password, salt)
-//    Return results
-//  Compare attempted pwd, stored pwd, salt (under Users constructor)
-//    If true (is a match)
-//      Let the user log in (redirect to '/' or '/index') send status 302
-//    If false (not a match)
-//      Send 200 status code, potential console log or something to let the user know the password was incorrect
-//  If error send 500
+// login
+app.post('/login',
+  //  Take in request and response params
+  (req, res) => {
+    var username = req.body.username;
+    var password = req.body.password;
+    //  Check if the username already exists (get)
+    return (models.Users.get({ username }))
+      .then(user => {
+        //  If the user exists, compare attempted pwd, stored pwd, salt (under Users constructor)
+        if (user) {
+          return models.Users.compare(password, user.password, user.salt);
+        //  If the user does NOT exist, throw noUser
+        } else {
+          throw noUser;
+        }
+      })
+      .then(isMatch => {
+        //  If true (is a match)
+        //    Let the user log in (redirect to '/' or '/index') send status 302
+        if (isMatch) {
+          res.redirect('/');
+        } else {
+          //  If false (not a match), throw noUser
+          throw noUser;
+        }
+      })
+      //  If error send 500
+      .error(error => {
+        res.status(500).send(error);
+      })
+      .catch(noUser => {
+        res.redirect('/login');
+      });
+  }
+);
 
 /************************************************************/
 // Handle the code parameter route last - if all other routes fail
