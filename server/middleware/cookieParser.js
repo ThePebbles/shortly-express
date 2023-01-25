@@ -14,10 +14,28 @@
 //clears and reassigns a new cookie if there is no session assigned to the cookie
 const parseCookies = (req, res, next) => {
   //console.log('THIS IS REQUEST', req);
-  if (req.headers.cookie !== undefined) {
-    var string = '{' + req.headers.cookie.split(' ').join().replaceAll(';', '').replaceAll('=', ': ').replaceAll(',', ', ') + '}';
-    console.log('Parsing cookies: ', JSON.parse(string));
-  }
+  // if (req.headers.cookie !== undefined) {
+  //   var string = '{' + req.headers.cookie.split(' ').join().replaceAll(';', '').replaceAll('=', ': ').replaceAll(',', ', ') + '}';
+  //   console.log('Parsing cookies: ', JSON.parse(string));
+  // }
+
+  //pull cookies out of request
+
+  //if cookies
+  //  parse into object
+  //  If the cookie was found in the sessions table, assign that obj to the session (for each cookie)
+  //  assign object to cookies property on request (req._setCookiesVariable)
+  //    if session assigned to user
+  //    username and userID property assignment to session object
+  //    else req._setSessionVariable with cookies?
+  //  return 'cookies are present' so we can catch malicious cookies
+  //if no cookies
+  //  start a new session
+  //  createRandom32String to generate hash for new session
+  //  add to sessions table (userId column may be null?)
+  //look at sessions table for current cookie
+  //  if cookie is not found
+  //    assign to current hash (cookie)
 };
 
 module.exports = parseCookies;
