@@ -40,7 +40,7 @@ describe('', function() {
     /*************************************************************************************/
     db = mysql.createConnection({
       user: 'root',
-      password: '', // <-- Changed this
+      password: 'students', // <-- Changed this
       database: 'shortly'
     });
 
