@@ -81,6 +81,7 @@ app.post('/links',
 app.post('/signup',
 //  take in request and response params
   (req, res) => {
+    // Don't take directly from req.body! Use vars
     var username = req.body.username;
     var password = req.body.password;
     //  use get to check if username already exists
@@ -125,6 +126,7 @@ app.post('/signup',
 app.post('/login',
   //  Take in request and response params
   (req, res) => {
+    // Don't take directly from req.body! Use vars
     var username = req.body.username;
     var password = req.body.password;
     //  Check if the username already exists (get)
