@@ -31,6 +31,8 @@ const parseCookies = (req, res, next) => {
     }
   }
 
+  // console.log('request: ', req);
+
   // Go to the next middleware fn
   next();
 
