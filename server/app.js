@@ -14,8 +14,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
 
-
-
 app.get('/',
   (req, res) => {
     res.render('index');
@@ -125,7 +123,7 @@ app.post('/signup',
 // login
 app.post('/login',
   //  Take in request and response params
-  (req, res) => {
+  (req, res, next) => {
     // Don't take directly from req.body! Use vars
     var username = req.body.username;
     var password = req.body.password;
@@ -143,13 +141,17 @@ app.post('/login',
       .then(isMatch => {
         //  If true (is a match)
         //    Let the user log in (redirect to '/' or '/index') send status 302
+        //console.log('USER ID IN ISMaTCH: ', user.id);
         if (isMatch) {
-          res.redirect('/');
+          //return Auth.createSession(req, res, next);
+          models.Sessions.create({'userId': user.id});
+          //res.redirect('/');
         } else {
           //  If false (not a match), throw noUser
           throw noUser;
         }
       })
+      .then(res.redirect('/'))
       //  If error send 500
       .error(error => {
         res.status(500).send(error);
@@ -159,6 +161,9 @@ app.post('/login',
       });
   }
 );
+
+//app.use(Auth.createSession);
+
 
 /************************************************************/
 // Handle the code parameter route last - if all other routes fail
