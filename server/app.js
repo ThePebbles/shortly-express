@@ -3,6 +3,7 @@ const path = require('path');
 const utils = require('./lib/hashUtils');
 const partials = require('express-partials');
 const Auth = require('./middleware/auth');
+const CookieParser = require('./middleware/cookieParser');
 const models = require('./models');
 
 const app = express();
@@ -13,6 +14,8 @@ app.use(partials());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
+//app.use(CookieParser.parseCookies);
+app.use(Auth.createSession);
 
 app.get('/',
   (req, res) => {
@@ -108,6 +111,12 @@ app.post('/signup',
       .then(hashedPassword => {
         return models.Users.update({'username': username, 'password': password}, {'username': username, 'password': hashedPassword});
       })
+      // .then((results) => {
+      //   return models.Users.get({'username': username});
+      // })
+      // .then((results) => {
+      //   return models.Sessions.create({'hash': null, 'userId': results.id});
+      // })
       // Let the user log in (redirect to '/' or '/index') status 302
       .then(results => {
         res.redirect('/');
@@ -133,8 +142,8 @@ app.post('/login',
         //  If the user exists, compare attempted pwd, stored pwd, salt (under Users constructor)
         if (user) {
           return models.Users.compare(password, user.password, user.salt);
-        //  If the user does NOT exist, throw noUser
         } else {
+          //  If the user does NOT exist, throw noUser
           throw noUser;
         }
       })
@@ -143,15 +152,21 @@ app.post('/login',
         //    Let the user log in (redirect to '/' or '/index') send status 302
         //console.log('USER ID IN ISMaTCH: ', user.id);
         if (isMatch) {
-          //return Auth.createSession(req, res, next);
-          models.Sessions.create({'userId': user.id});
-          //res.redirect('/');
+          //return models.Sessions.create({'hash': null, 'userId': user.id});
+          //return Auth.createSession(req, res, res.redirect('/'));
+          res.redirect('/');
         } else {
           //  If false (not a match), throw noUser
-          throw noUser;
+          return res.redirect('/login');
         }
       })
-      .then(res.redirect('/'))
+      // .then((results) => {
+      //   if (results) {
+      //     return res.redirect('/');
+      //   } else {
+      //     return res.redirect('/login');
+      //   }
+      // })
       //  If error send 500
       .error(error => {
         res.status(500).send(error);
@@ -162,7 +177,7 @@ app.post('/login',
   }
 );
 
-//app.use(Auth.createSession);
+
 
 
 /************************************************************/

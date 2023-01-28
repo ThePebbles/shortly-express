@@ -11,21 +11,34 @@ const Promise = require('bluebird');
 //clears and reassigns a new cookie if there is no session assigned to the cookie
 
 module.exports.createSession = (req, res, next) => {
-  console.log('REQ: ', req);
-  //relevant user information: userId, isLoggedIn,
-  return models.Sessions.getAll({'hash': hash})
-    .then(results => {
-      if (req.cookies === {} || results === undefined) {
-        throw newSession;
-      } else {
-        for (var key in req.cookies) {
-          if (results[req.cookies[key]] === undefined) {
-            throw newSession;
-          }
-        }
-      }
-      // return ????? *** STOPPED HERE THURSDAY ***
-    });
+  console.log('Create Session Req: ', req);
+  //if req.cookies is not empty
+
+  //  check if that cookie is associated with a person then
+  //    get session id then
+  //    req._setSessionVariable to results (or can do typical object value assignment) req[session] = results
+  //    res.cookie('name for the cookie (shortlyid)', 'what is the cookie')
+
+  //  if cookie is not associated with a person
+  //    create session then
+  //    get session id then
+  //    req._setSessionVariable to results (or can do typical object value assignment) req[session] = results
+  //    res.cookie('name for the cookie (shortlyid)', 'what is the cookie')
+
+  //if req.cookies is empty
+  //    create session then
+  //    get session id then
+  //    req._setSessionVariable to results (or can do typical object value assignment) req[session] = results
+  //    res.cookie('name for the cookie (shortlyid)', 'what is the cookie')
+
+
+
+
+
+
+
+
+
 
   // Commenting Out for Now!
   // if (req.cookies === {}) {
