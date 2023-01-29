@@ -17,8 +17,8 @@ const models = require('../models');
 //creates a new hash for each new session
 //assigns a username and userId property to the session object if the session is assigned to a user
 //clears and reassigns a new cookie if there is no session assigned to the cookie
-const parseCookies = (req, res, next) => {
-  console.log('req from cookies: ', req);
+module.exports.parseCookies = (req, res, next) => {
+  //console.log('req from cookies: ', req);
   //pull cookies out of request
   var cookies = req.headers.cookie;
 
@@ -69,4 +69,4 @@ const parseCookies = (req, res, next) => {
   //    assign to current hash (cookie)
 };
 
-module.exports = parseCookies;
+// module.exports = parseCookies;

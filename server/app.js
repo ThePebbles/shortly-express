@@ -14,7 +14,7 @@ app.use(partials());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
-//app.use(CookieParser.parseCookies);
+app.use(CookieParser.parseCookies);
 app.use(Auth.createSession);
 
 app.get('/',
@@ -86,7 +86,7 @@ app.post('/signup',
     var username = req.body.username;
     var password = req.body.password;
     //  use get to check if username already exists
-    return (models.Users.get({ username }))
+    return (models.Users.get({ 'username': username }))
     // if successful, redirect to signup page, let them know username already exists
       .then(user => {
         if (user) {
@@ -111,12 +111,6 @@ app.post('/signup',
       .then(hashedPassword => {
         return models.Users.update({'username': username, 'password': password}, {'username': username, 'password': hashedPassword});
       })
-      // .then((results) => {
-      //   return models.Users.get({'username': username});
-      // })
-      // .then((results) => {
-      //   return models.Sessions.create({'hash': null, 'userId': results.id});
-      // })
       // Let the user log in (redirect to '/' or '/index') status 302
       .then(results => {
         res.redirect('/');
@@ -137,7 +131,7 @@ app.post('/login',
     var username = req.body.username;
     var password = req.body.password;
     //  Check if the username already exists (get)
-    return (models.Users.get({ username }))
+    return (models.Users.get({ 'username': username }))
       .then(user => {
         //  If the user exists, compare attempted pwd, stored pwd, salt (under Users constructor)
         if (user) {
@@ -149,24 +143,13 @@ app.post('/login',
       })
       .then(isMatch => {
         //  If true (is a match)
-        //    Let the user log in (redirect to '/' or '/index') send status 302
-        //console.log('USER ID IN ISMaTCH: ', user.id);
         if (isMatch) {
-          //return models.Sessions.create({'hash': null, 'userId': user.id});
-          //return Auth.createSession(req, res, res.redirect('/'));
           res.redirect('/');
         } else {
           //  If false (not a match), throw noUser
           return res.redirect('/login');
         }
       })
-      // .then((results) => {
-      //   if (results) {
-      //     return res.redirect('/');
-      //   } else {
-      //     return res.redirect('/login');
-      //   }
-      // })
       //  If error send 500
       .error(error => {
         res.status(500).send(error);

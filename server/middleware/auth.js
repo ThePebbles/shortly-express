@@ -11,25 +11,54 @@ const Promise = require('bluebird');
 //clears and reassigns a new cookie if there is no session assigned to the cookie
 
 module.exports.createSession = (req, res, next) => {
-  console.log('Create Session Req: ', req);
-  //if req.cookies is not empty
+  var sessionHandler = function() {
+    return models.Sessions.create()
+      .then((results) => {
+        return models.Sessions.get({'id': results.insertId});
+      })
+      .then((results) => {
+        if (req['session'] === undefined) {
+          req['session'] = {};
+        }
+        req['session']['hash'] = results.hash;
+        res.cookie('shortlyid', results.hash);
+        next();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
-  //  check if that cookie is associated with a person then
-  //    get session id then
-  //    req._setSessionVariable to results (or can do typical object value assignment) req[session] = results
-  //    res.cookie('name for the cookie (shortlyid)', 'what is the cookie')
+  if (req.cookies === undefined || Object.keys(req.cookies).length === 0) {
+    return sessionHandler();
+  }
 
-  //  if cookie is not associated with a person
-  //    create session then
-  //    get session id then
-  //    req._setSessionVariable to results (or can do typical object value assignment) req[session] = results
-  //    res.cookie('name for the cookie (shortlyid)', 'what is the cookie')
+  if (Object.keys(req.cookies).length !== 0) {
+    return models.Sessions.get({'hash': req.cookies.shortlyid})
+      .then((results) => {
+        if (results === undefined || results.userId === null) {
+          return sessionHandler();
+        }
+        if (results.userId !== null && results !== undefined) {
+          if (req['session'] === undefined) {
+            req['session'] = {};
+          }
+          req['session']['hash'] = results.hash;
+          req['session']['userId'] = results.userId;
+          res.cookie('shortlyid', results.hash);
+          return models.Users.get({'id': results.userId})
+            .then((results) => {
+              req._setSessionVariable('user', {'username': results.username});
+              req['session']['user'] = {'username': results.username};
+              next();
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        }
+      });
+  }
 
-  //if req.cookies is empty
-  //    create session then
-  //    get session id then
-  //    req._setSessionVariable to results (or can do typical object value assignment) req[session] = results
-  //    res.cookie('name for the cookie (shortlyid)', 'what is the cookie')
 
 
 
